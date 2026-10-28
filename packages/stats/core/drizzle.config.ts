@@ -14,7 +14,7 @@ export default defineConfig({
     password: Resource.StatsDatabase.password,
     port: Resource.StatsDatabase.port,
     ssl: {
-      rejectUnauthorized: false,
+      rejectUnauthorized: true,
     },
   },
 })
