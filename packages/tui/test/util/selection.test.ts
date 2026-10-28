@@ -196,3 +196,20 @@ test("does not clear a selection being extended while the clipboard write is pen
   await Promise.resolve()
   expect(clears).toBe(0)
 })
+
+test("retains selection when clipboard delivery cannot be confirmed", async () => {
+  let clears = 0
+  const selection = {
+    getSelectedText: () => "selected",
+    selectedRenderables: [],
+    isStart: false,
+    behavior: "cell" as const,
+  }
+  const renderer = { getSelection: () => selection, clearSelection: () => clears++ }
+  const clipboard = { read: async () => undefined, write: async () => "unconfirmed" as const }
+  const toast = { show: () => {}, error: () => {} }
+
+  copyOnSelectRelease({ isDragging: true }, renderer, toast, clipboard, true)
+  await Promise.resolve()
+  expect(clears).toBe(0)
+})

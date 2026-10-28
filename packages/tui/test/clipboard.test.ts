@@ -98,7 +98,7 @@ test("uses all available routes but skips the process host remotely", async () =
     }),
   )
 
-  expect(await clipboard.write("hello")).toBeUndefined()
+  expect(await clipboard.write("hello")).toBe("unconfirmed")
   expect(writes).toEqual({ host: 0, terminal: 1 })
 })
 

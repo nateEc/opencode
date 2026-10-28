@@ -363,7 +363,7 @@ export const settings: Setting[] = [
     title: "Clear selection after copying",
     category: "Terminal",
     path: ["terminal", "clear_selection_on_copy"],
-    description: "Clear the selection after copy-on-select; resets multi-click selection",
+    description: "Clear the selection after confirmed copy-on-select; resets multi-click selection",
     default: false,
     values: [false, true],
     labels: ["off", "on"],

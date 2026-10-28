@@ -57,9 +57,10 @@ export function copy(renderer: Renderer, toast: Toast, clipboard: ClipboardServi
 
   clipboard
     .write(clipboardText)
-    .then(() => {
+    .then((result) => {
       if (
         clearOnCopy &&
+        result !== "unconfirmed" &&
         renderer.getSelection() === selection &&
         !selection.isDragging &&
         selection.getSelectedText() === text
