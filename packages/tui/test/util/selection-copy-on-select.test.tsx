@@ -6,7 +6,7 @@ import { useClipboard } from "../../src/context/clipboard"
 import { copyOnSelectRelease } from "../../src/util/selection"
 import { TestTuiContexts } from "../fixture/tui-environment"
 
-function CopyOnSelectText() {
+function CopyOnSelectText(props: { clearOnCopy?: boolean }) {
   const renderer = useRenderer()
   const clipboard = useClipboard()
   const toast = {
@@ -14,7 +14,7 @@ function CopyOnSelectText() {
     error: () => {},
   }
   return (
-    <box onMouseUp={(event) => copyOnSelectRelease(event, renderer, toast, clipboard)}>
+    <box onMouseUp={(event) => copyOnSelectRelease(event, renderer, toast, clipboard, props.clearOnCopy)}>
       <text>alpha beta gamma</text>
     </box>
   )
@@ -58,6 +58,27 @@ test.each([
     await app.mockMouse.click(input.column, 0)
     expect(app.renderer.getSelection()?.getSelectedText()).toBe("alpha beta gamma")
     expect(writes).toEqual([...(input.word ? [input.word] : []), "alpha beta gamma"])
+  } finally {
+    app.renderer.destroy()
+  }
+})
+
+test("copy-on-select can clear the copied selection", async () => {
+  const writes: string[] = []
+  const app = await testRender(
+    () => (
+      <TestTuiContexts clipboard={{ read: async () => undefined, write: async (text) => void writes.push(text) }}>
+        <CopyOnSelectText clearOnCopy />
+      </TestTuiContexts>
+    ),
+    { width: 20, height: 2 },
+  )
+  try {
+    app.renderer.start()
+    await app.waitForFrame((frame) => frame.includes("beta"))
+    await app.mockMouse.drag(6, 0, 9, 0)
+    await app.waitFor(() => writes.length === 1 && !app.renderer.hasSelection)
+    expect(writes).toEqual(["beta"])
   } finally {
     app.renderer.destroy()
   }

@@ -261,7 +261,8 @@ Configure terminal integration:
 {
   "terminal": {
     "title": true,
-    "copy": "select"
+    "copy": "select",
+    "clear_selection_on_copy": true
   }
 }
 ```
@@ -272,6 +273,7 @@ Configure terminal integration:
 | ---------------- | -------------------- | -------------------------------------------------------------------------------------------------------- |
 | `terminal.title` | boolean              | Updates the terminal window title.                                                                       |
 | `terminal.copy`  | `manual` or `select` | Copies manually or immediately after selection. The platform default is `manual` on Windows and `select` elsewhere. |
+| `terminal.clear_selection_on_copy` | boolean | Clears the selection after a successful copy-on-select. Defaults to `false`; enabling it resets double-click and triple-click selection history. |
 
 </div>
 

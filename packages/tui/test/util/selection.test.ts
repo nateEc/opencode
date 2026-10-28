@@ -113,3 +113,86 @@ test("copies a non-empty dragged selection without clearing its highlight", asyn
   expect(value.clears()).toBe(0)
   expect(value.writes).toEqual(["selected"])
 })
+
+test("optionally clears a selection only after its clipboard write succeeds", async () => {
+  const pending = Promise.withResolvers<void>()
+  let clears = 0
+  const selection = {
+    getSelectedText: () => "selected",
+    selectedRenderables: [],
+    isStart: false,
+    behavior: "cell" as const,
+  }
+  const renderer = { getSelection: () => selection, clearSelection: () => clears++ }
+  const clipboard = { read: async () => undefined, write: () => pending.promise }
+  const toast = { show: () => {}, error: () => {} }
+
+  expect(copyOnSelectRelease({ isDragging: true }, renderer, toast, clipboard, true)).toBeTrue()
+  expect(clears).toBe(0)
+  pending.resolve()
+  await pending.promise
+  await Promise.resolve()
+  expect(clears).toBe(1)
+})
+
+test("does not clear a newer selection after an earlier clipboard write", async () => {
+  const pending = Promise.withResolvers<void>()
+  let clears = 0
+  const first = { getSelectedText: () => "first", selectedRenderables: [], isStart: false, behavior: "cell" as const }
+  const second = { ...first, getSelectedText: () => "second" }
+  let selection = first
+  const renderer = { getSelection: () => selection, clearSelection: () => clears++ }
+  const clipboard = { read: async () => undefined, write: () => pending.promise }
+  const toast = { show: () => {}, error: () => {} }
+
+  copyOnSelectRelease({ isDragging: true }, renderer, toast, clipboard, true)
+  selection = second
+  pending.resolve()
+  await pending.promise
+  await Promise.resolve()
+  expect(clears).toBe(0)
+})
+
+test("retains selection if the clipboard write fails", async () => {
+  const pending = Promise.withResolvers<void>()
+  let clears = 0
+  let errors = 0
+  const selection = {
+    getSelectedText: () => "selected",
+    selectedRenderables: [],
+    isStart: false,
+    behavior: "cell" as const,
+  }
+  const renderer = { getSelection: () => selection, clearSelection: () => clears++ }
+  const clipboard = { read: async () => undefined, write: () => pending.promise }
+  const toast = { show: () => {}, error: () => errors++ }
+
+  copyOnSelectRelease({ isDragging: true }, renderer, toast, clipboard, true)
+  pending.reject(new Error("clipboard unavailable"))
+  await pending.promise.catch(() => {})
+  await Promise.resolve()
+  expect(clears).toBe(0)
+  expect(errors).toBe(1)
+})
+
+test("does not clear a selection being extended while the clipboard write is pending", async () => {
+  const pending = Promise.withResolvers<void>()
+  let clears = 0
+  const selection = {
+    getSelectedText: () => "selected",
+    selectedRenderables: [],
+    isStart: false,
+    isDragging: false,
+    behavior: "cell" as const,
+  }
+  const renderer = { getSelection: () => selection, clearSelection: () => clears++ }
+  const clipboard = { read: async () => undefined, write: () => pending.promise }
+  const toast = { show: () => {}, error: () => {} }
+
+  copyOnSelectRelease({ isDragging: true }, renderer, toast, clipboard, true)
+  selection.isDragging = true
+  pending.resolve()
+  await pending.promise
+  await Promise.resolve()
+  expect(clears).toBe(0)
+})

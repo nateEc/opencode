@@ -134,6 +134,9 @@ test("names tool grouping explicitly in settings", () => {
 test("validates terminal copy behavior", () => {
   expect(decodeInfo({ terminal: { copy: "manual" } })).toEqual({ terminal: { copy: "manual" } })
   expect(decodeInfo({ terminal: { copy: "select" } })).toEqual({ terminal: { copy: "select" } })
+  expect(decodeInfo({ terminal: { copy: "select", clear_selection_on_copy: true } })).toEqual({
+    terminal: { copy: "select", clear_selection_on_copy: true },
+  })
   expect(() => decodeInfo({ terminal: { copy: "always" } })).toThrow()
 
   const setting = settings.find((setting) => setting.path.join(".") === "terminal.copy")

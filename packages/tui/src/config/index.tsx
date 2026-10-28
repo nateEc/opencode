@@ -134,6 +134,9 @@ export const Info = Schema.Struct({
       copy: Schema.optional(Schema.Literals(["manual", "select"])).annotate({
         description: "Copy text manually or immediately after selecting it",
       }),
+      clear_selection_on_copy: Schema.optional(Schema.Boolean).annotate({
+        description: "Clear the selection after a successful copy-on-select; resets multi-click selection",
+      }),
     }),
   ).annotate({ description: "Terminal integration settings" }),
   prompt: Schema.optional(

@@ -16,6 +16,7 @@ type Renderer = {
     getSelectedText: () => string
     selectedRenderables: FocusableSelectionTarget[]
     isStart: boolean
+    isDragging?: boolean
     behavior: SelectionBehavior
   } | null
   clearSelection: () => void
@@ -36,12 +37,13 @@ export function copyOnSelectRelease(
   renderer: Renderer,
   toast: Toast,
   clipboard: ClipboardService,
+  clearOnCopy = false,
 ): boolean {
   if (!event.isDragging) return false
-  return copy(renderer, toast, clipboard)
+  return copy(renderer, toast, clipboard, clearOnCopy)
 }
 
-export function copy(renderer: Renderer, toast: Toast, clipboard: ClipboardService): boolean {
+export function copy(renderer: Renderer, toast: Toast, clipboard: ClipboardService, clearOnCopy = false): boolean {
   const selection = renderer.getSelection()
   if (!selection) return false
   if (selection.isStart && selection.behavior === "cell") return false
@@ -55,10 +57,19 @@ export function copy(renderer: Renderer, toast: Toast, clipboard: ClipboardServi
 
   clipboard
     .write(clipboardText)
-    .then(() => toast.show({ message: "Copied to clipboard", variant: "info" }))
+    .then(() => {
+      if (
+        clearOnCopy &&
+        renderer.getSelection() === selection &&
+        !selection.isDragging &&
+        selection.getSelectedText() === text
+      )
+        renderer.clearSelection()
+      toast.show({ message: "Copied to clipboard", variant: "info" })
+    })
     .catch(toast.error)
 
-  // Copy never clears selection, including empty releases: clearing also resets multi-click history.
+  // By default copy preserves selection because clearing also resets multi-click history.
   return true
 }
 

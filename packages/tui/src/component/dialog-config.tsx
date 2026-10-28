@@ -360,6 +360,16 @@ export const settings: Setting[] = [
     keywords: ["selection", "clipboard"],
   },
   {
+    title: "Clear selection after copying",
+    category: "Terminal",
+    path: ["terminal", "clear_selection_on_copy"],
+    description: "Clear the selection after copy-on-select; resets multi-click selection",
+    default: false,
+    values: [false, true],
+    labels: ["off", "on"],
+    keywords: ["selection", "clipboard"],
+  },
+  {
     title: "Developer tools",
     category: "Debug",
     path: ["debug", "devtools"],

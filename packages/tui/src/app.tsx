@@ -1418,7 +1418,14 @@ function App() {
       onMouseUp={(event) => {
         const url = clickedLink(renderer, event)
         if (url) return void openUrl(url).catch(toast.error)
-        if (copyOnSelectEnabled()) Selection.copyOnSelectRelease(event, renderer, toast, clipboard)
+        if (copyOnSelectEnabled())
+          Selection.copyOnSelectRelease(
+            event,
+            renderer,
+            toast,
+            clipboard,
+            config.data.terminal?.clear_selection_on_copy,
+          )
       }}
     >
       <box
